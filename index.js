@@ -6,11 +6,16 @@ addEventListener('fetch', event => {
  * @param {Request} request
  */
 async function handleRequest(request) {
+  const start = Date.now();
   const resp = await fetch(LIST_URL, {
     cf: { cacheTtl: 86400 }
   });
   const items = await resp.json();
-  return new Response(items[Math.floor(Math.random() * items.length)], {
+  const body = {
+    item: items[Math.floor(Math.random() * items.length)],
+    elapsed: Date.now() - start,
+  };
+  return new Response(JSON.stringify(body), {
     headers: { 'content-type': 'application/json' },
   })
 }
