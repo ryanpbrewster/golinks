@@ -16,7 +16,10 @@ async function handleRequest(request) {
 
 async function listLinks() {
   const list = await golinks.list();
-  const keys = list.keys.map(item => `<li>${item.name.substring(1)}</li>`).join('\n');
+  const keys = list.keys.map(item => {
+    const name = item.name.substring(1);
+    return `<li><a href="https://go/${name}">${name}</a></li>`;
+  }).join('\n');
   const html = `<body><ul>${keys}</ul></body>`;
   return new Response(html, { headers: { 'Content-Type': 'text/html' } })
 }
