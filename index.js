@@ -1,23 +1,32 @@
 addEventListener('fetch', event => {
   event.respondWith(handleRequest(event.request))
 })
-/**
- * Respond with hello worker text
- * @param {Request} request
- */
+
 async function handleRequest(request) {
-  const start = Date.now();
-  const resp = await fetch(LIST_URL, {
-    cf: { cacheTtl: 86400 }
-  });
-  const items = await resp.json();
-  const body = {
-    item: items[Math.floor(Math.random() * items.length)],
-    elapsed: Date.now() - start,
-  };
-  return new Response(JSON.stringify(body), {
-    headers: { 'content-type': 'application/json' },
-  })
+  const url = new URL(request.url);
+  const path = url.pathname;
+  switch (request.method.toUpperCase()) {
+    case "GET":
+      return path === "/" ? listLinks() : redirectToLink(path, url.origin);
+    case "PUT":
+      return setLink(path, await request.text());
+  }
+  return new Response('Not found', { status: 404 });
 }
 
-const LIST_URL = 'https://pairwise-ranked.firebaseio.com/lists/colors.json';
+async function listLinks() {
+  const list = await golinks.list();
+  const keys = list.keys.map(item => `<li>${item.name.substring(1)}</li>`).join('\n');
+  const html = `<body><ul>${keys}</ul></body>`;
+  return new Response(html, { headers: { 'Content-Type': 'text/html' } })
+}
+
+async function redirectToLink(path, origin) {
+  const link = await golinks.get(path);
+  return Response.redirect(link ?? origin);
+}
+
+async function setLink(path, body) {
+  await golinks.put(path, body);
+  return new Response(`set link ${path} to ${body}`);
+}

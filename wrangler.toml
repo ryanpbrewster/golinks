@@ -4,3 +4,7 @@ account_id = "c83c234da73619c14677c5385e638a0f"
 workers_dev = true
 route = ""
 zone_id = ""
+
+kv-namespaces = [
+  { binding = "golinks", id = "797f91bdabc64b15bc9e048a21185e10" }
+]
