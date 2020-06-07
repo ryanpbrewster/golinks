@@ -1,8 +1,10 @@
 const BASE = "https://golinks.brewster.workers.dev";
+let namespace = "default";
+
 chrome.webRequest.onBeforeRequest.addListener((details) => {
   const url = new URL(details.url);
   if (url.hostname === "go") {
-    return { redirectUrl: BASE + url.pathname };
+    return { redirectUrl: BASE + '/' + namespace + url.pathname };
   }
   return {};
 }, {
@@ -15,7 +17,7 @@ chrome.extension.onConnect.addListener((port) => {
     const key = JSON.parse(raw).key;
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       const link = tabs[0].url;
-      const put = fetch(BASE + '/' + key, {
+      const put = fetch(BASE + '/' + namespace + '/' + key, {
         method: "PUT",
         body: link,
       });
