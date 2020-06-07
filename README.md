@@ -1,15 +1,13 @@
-# 👷 `worker-template` Hello World
+# Golinks
 
-A template for kick starting a Cloudflare worker project.
+A simple utility to redirect from short-links, like `go/foo`, to full urls, like `https://google.com`.
 
-[`index.js`](https://github.com/cloudflare/worker-template/blob/master/index.js) is the content of the Workers script.
+## Backend
 
-#### Wrangler
+Powered by CloudFlare workers. Check out `worker/`.
 
-To generate using [wrangler](https://github.com/cloudflare/wrangler)
+## Extension
 
-```
-wrangler generate projectname https://github.com/cloudflare/worker-template
-```
-
-Further documentation for Wrangler can be found [here](https://developers.cloudflare.com/workers/tooling/wrangler).
+Does two things:
+  - has a popup to let you set new shortlinks
+  - intercepts requests to `https://go/<path>` and redirect them to the CloudFlare worker backend.
