@@ -1,11 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
+  const existing = document.getElementById('existing')
+  chrome.runtime.sendMessage(
+    { getKeys: true },
+    (keys) => {
+      keys.forEach((key) => {
+        const a = document.createElement("a");
+        a.href = `https://go/${key}`;
+        a.target = "_blank";
+        a.rel = "noopener";
+        a.innerText = `go/${key}`;
+        const item = document.createElement("li");
+        item.appendChild(a);
+        existing.appendChild(item);
+      });
+    },
+  )
+  
+
   const shortlink = document.getElementById('shortlink')
   shortlink.addEventListener('keydown', (evt) => {
     if (evt.key === 'Enter') {
       shortlink.disabled = true
       shortlink.classList.add('inflight')
       chrome.runtime.sendMessage(
-        { setLink: { key: shortlink.value } },
+        { setKey: { key: shortlink.value } },
         (resp) => {
           shortlink.classList.add(resp)
         },

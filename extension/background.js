@@ -35,8 +35,14 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.getNamespace) {
     return sendResponse(namespace)
   }
-  if (msg.setLink) {
-    handleSetLink(msg.setLink.key)
+  if (msg.getKeys) {
+    handleGetKeys()
+      .then((resp) => sendResponse(resp))
+      .catch(() => sendResponse('failure'))
+    return true
+  }
+  if (msg.setKey) {
+    handleSetKey(msg.setKey.key)
       .then(() => sendResponse('success'))
       .catch(() => sendResponse('failure'))
     return true
@@ -58,15 +64,32 @@ async function handleSetNamespace(namespace) {
   })
 }
 
-async function handleSetLink(key) {
+async function handleSetKey(key) {
   return new Promise((resolve, reject) => {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
       const link = tabs[0].url
-      const request = fetch(BASE + '/' + namespace + '/' + key, {
+      console.log(`setting key ${key} = ${link}`);
+      const resp = await fetch(BASE + '/' + namespace + '/' + key, {
         method: 'PUT',
         body: link,
       })
-      resolve(request)
+      resolve(resp);
+    })
+  })
+}
+
+async function handleGetKeys() {
+  console.log(`getting keys`);
+  return new Promise((resolve, reject) => {
+    chrome.tabs.query({ active: true, currentWindow: true }, async (tabs) => {
+      const link = tabs[0].url
+      console.log(`getting keys for ${link}`);
+      const request = await fetch(BASE + '/' + namespace, {
+        headers: { "X-Golinks-Target": link },
+      })
+      const keys = await request.json();
+      console.log(`keys for ${link}: `, keys);
+      resolve(keys);
     })
   })
 }
