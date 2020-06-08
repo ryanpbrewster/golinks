@@ -8,11 +8,11 @@ async function handleRequest(request) {
   if (!parsed) {
     return new Response('Invalid namespace', { status: 400 });
   }
-  const { namespace, name } = parsed;
+  const { namespace, key } = parsed;
   switch (request.method.toUpperCase()) {
     case 'GET':
-      if (name) {
-        return redirectToLink(namespace, name, url.origin + '/' + namespace);
+      if (key) {
+        return redirectToLink(namespace, key, url.origin + '/' + namespace);
       }
       const target = request.headers.get('x-golinks-target');
       if (target) {
@@ -20,26 +20,26 @@ async function handleRequest(request) {
       }
       return keyOverview(namespace);
     case 'PUT':
-      return setLink(namespace, name, await request.text());
+      return setLink(namespace, key, await request.text());
   }
   return new Response('Not found', { status: 404 });
 }
 
-async function redirectToLink(namespace, name, origin) {
-  const link = await golinks.get(encodeKey(namespace, name));
+async function redirectToLink(namespace, key, origin) {
+  const link = await golinks.get(encodeKey(namespace, key));
   return Response.redirect(link ?? origin);
 }
 
-async function setLink(namespace, name, link) {
-  const cur = await golinks.get(encodeKey(namespace, name));
+async function setLink(namespace, key, link) {
+  const cur = await golinks.get(encodeKey(namespace, key));
   if (cur) {
-    return new Response(`${name} is already set to ${cur}`, { status: 400 });
+    return new Response(`${key} is already set to ${cur}`, { status: 400 });
   }
   await Promise.all([
-    golinks.put(encodeKey(namespace, name), link),
-    golinks.put(encodeLink(namespace, link, name), true),
+    golinks.put(encodeKey(namespace, key), link),
+    golinks.put(encodeLink(namespace, link, key), true),
   ]);
-  return new Response(`set link ${namespace}/${name} to ${link}`);
+  return new Response(`set link ${namespace}/${key} to ${link}`);
 }
 
 async function lookupByLink(namespace, link) {
@@ -63,16 +63,20 @@ async function keyOverview(namespace) {
 }
 
 function parsePath(url) {
-  console.log('parsing ', url);
-  const [namespace, name] = url.pathname.substring(1).split('/');
-  if (namespace) {
-    return { namespace, name };
-  }
-  return null;
+  console.log('parsing ', url.pathname);
+  const path = url.pathname.substring(1);
+  if (path.length === 0) return null;
+  const idx = path.indexOf('/');
+  if (idx === -1) return { namespace: path };
+  if (idx === 0) return null;
+
+  const namespace = path.substring(0, idx);
+  const key = path.substring(idx + 1);
+  return { namespace, key };
 }
 
-function encodeKey(namespace, path) {
-  return `links/${namespace}/${path}`;
+function encodeKey(namespace, key) {
+  return `links/${namespace}/${key}`;
 }
 function decodeKey(namespace, raw) {
   return raw.substring(`links/${namespace}/`.length);
