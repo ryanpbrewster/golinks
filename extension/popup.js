@@ -3,10 +3,9 @@ document.addEventListener('DOMContentLoaded', () => {
   shortlink.addEventListener("keydown", (evt) => {
     if (evt.key === "Enter") {
       shortlink.disabled = true;
-      const port = chrome.extension.connect({ name: "Set Link" });
-      port.postMessage(JSON.stringify({ setLink: { key: shortlink.value } }));
-      port.onMessage.addListener((msg) => {
-        shortlink.classList = [msg];
+      shortlink.classList.add("inflight");
+      chrome.runtime.sendMessage({ setLink: {key:shortlink.value} }, (resp) => {
+        shortlink.classList.add(resp);
       });
     }
   });
@@ -24,6 +23,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const locked = document.getElementById("locked");
   const unlocked = document.getElementById("unlocked");
   const namespace = document.getElementById("namespace")
+  chrome.runtime.sendMessage({ getNamespace: true }, (resp) => {
+    namespace.value = resp;
+  });
   locked.addEventListener("click", (evt) => {
     locked.classList.add('hidden');
     unlocked.classList.remove('hidden');
@@ -38,10 +40,9 @@ document.addEventListener('DOMContentLoaded', () => {
   namespace.addEventListener("keydown", (evt) => {
     if (evt.key === "Enter") {
       namespace.disabled = true;
-      port.postMessage(JSON.stringify({ setNamespace: { namespace: namespace.value } }));
-      port.onMessage.addListener((msg) => {
+      chrome.runtime.sendMessage({ setNamespace: { namespace: namespace.value } }, (resp) => {
         namespace.disabled = false;
-        namespace.classList = [msg];
+        namespace.classList.add(resp);
       });
     }
   });

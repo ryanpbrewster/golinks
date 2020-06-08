@@ -1,12 +1,20 @@
 const BASE = "https://golinks.brewster.workers.dev";
 
+// We store the golinks namespace in Chrome sync storage.
+// Fetch it on initial load, and also set up a listener to catch any further updates.
 let namespace = "default";
-chrome.storage.onChanged.addListener((changes, area) => {
-  if (changes.namespace) {
-    namespace = changes.namespace.newValue;
+chrome.storage.sync.get('namespace', (result) => {
+  if (result.namespace) {
+    namespace = result.namespace;
   }
+  chrome.storage.onChanged.addListener((changes, area) => {
+    if (changes.namespace) {
+      namespace = changes.namespace.newValue;
+    }
+  });
 });
 
+// Intercept any "main_frame" requests that look like `go/asdf`. Redirect them to the golinks backend.
 chrome.webRequest.onBeforeRequest.addListener((details) => {
   const url = new URL(details.url);
   if (url.hostname === "go") {
@@ -14,29 +22,27 @@ chrome.webRequest.onBeforeRequest.addListener((details) => {
   }
   return {};
 }, {
-  urls: ["<all_urls>"],
+  urls: ["*://go/*"],
   types: ["main_frame"]
 }, ["blocking"]);
 
-chrome.extension.onConnect.addListener((port) => {
-  port.onMessage.addListener((raw) => {
-    const msg = JSON.parse(raw);
-    console.log("handling message: ", msg);
-    let resp;
-    if (msg.setLink) {
-      console.log("setting key ", msg.setLink);
-      resp = handleSetLink(msg.setLink.key);
-    } else if (msg.setNamespace) {
-      console.log("setting namespace ", msg.setNamespace);
-      resp = handleSetNamespace(msg.setNamespace.namespace);
-    } else {
-      resp = Promise.reject();
-    }
-    port.postMessage('inflight');
-    resp
-      .then(() => port.postMessage('success'))
-      .catch(() => port.postMessage('failure'));
-  });
+// The popup needs to communicate with us. Handle incoming messages.
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
+  let done;
+  if (msg.getNamespace) {
+    return sendResponse(namespace);
+  } else if (msg.setLink) {
+    handleSetLink(msg.setLink.key);
+      .then(() => sendResponse('success'))
+      .catch(() => sendResponse('failure'));
+    return true;
+  } else if (msg.setNamespace) {
+    handleSetNamespace(msg.setNamespace.namespace);
+      .then(() => sendResponse('success'))
+      .catch(() => sendResponse('failure'));
+    return true;
+  }
+  return false;
 });
 
 async function handleSetNamespace(namespace) {
