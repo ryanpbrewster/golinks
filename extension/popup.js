@@ -18,13 +18,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (evt.key === 'Enter') {
       shortlink.disabled = true;
       shortlink.classList.add('inflight');
-      chrome.runtime.sendMessage(
-        { setKey: { key: shortlink.value } },
-        (resp) => {
-          shortlink.classList.add(resp);
-          shortlink.disabled = false;
-        },
-      );
+      chrome.runtime.sendMessage({ setKey: { key: shortlink.value } }, (resp) => {
+        shortlink.classList.add(resp);
+        shortlink.disabled = false;
+      });
     }
   });
 
@@ -58,13 +55,10 @@ document.addEventListener('DOMContentLoaded', () => {
   namespace.addEventListener('keydown', (evt) => {
     if (evt.key === 'Enter') {
       namespace.disabled = true;
-      chrome.runtime.sendMessage(
-        { setNamespace: { namespace: namespace.value } },
-        (resp) => {
-          namespace.disabled = false;
-          namespace.classList.add(resp);
-        },
-      );
+      chrome.runtime.sendMessage({ setNamespace: { namespace: namespace.value } }, (resp) => {
+        namespace.disabled = false;
+        namespace.classList.add(resp);
+      });
     }
   });
 });
