@@ -73,7 +73,11 @@ async function handleSetKey(key) {
         method: 'PUT',
         body: link,
       })
-      resolve(resp);
+      if (resp.status === 200) {
+        resolve();
+      } else {
+        reject();
+      }
     })
   })
 }

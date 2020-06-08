@@ -31,6 +31,10 @@ async function redirectToLink(namespace, name, origin) {
 }
 
 async function setLink(namespace, name, link) {
+  const cur = await golinks.get(encodeKey(namespace, name))
+  if (cur) {
+    return new Response(`${name} is already set to ${cur}`, { status: 400 });
+  }
   await Promise.all([
     golinks.put(encodeKey(namespace, name), link),
     golinks.put(encodeLink(namespace, link, name), true),

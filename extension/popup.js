@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
         { setKey: { key: shortlink.value } },
         (resp) => {
           shortlink.classList.add(resp)
+          shortlink.disabled = false;
         },
       )
     }
