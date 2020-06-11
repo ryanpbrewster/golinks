@@ -14,9 +14,9 @@
     "512": "icon.png"
   },
   "permissions": [
-    "<all_urls>",
+    "activeTab",
+    "*://go/*",
     "storage",
-    "tabs",
     "webRequest",
     "webRequestBlocking"
   ]
