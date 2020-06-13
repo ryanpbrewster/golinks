@@ -10,6 +10,15 @@ async function handleRequest(request) {
   }
   const { namespace, key } = parsed;
   switch (request.method.toUpperCase()) {
+    case 'OPTIONS':
+      return new Response(null, {
+        status: 204,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Headers': '*',
+          'Access-Control-Allow-Methods': '*',
+        },
+      });
     case 'GET':
       if (key) {
         return redirectToLink(namespace, key, url.origin + '/' + namespace);
