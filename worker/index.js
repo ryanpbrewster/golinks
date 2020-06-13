@@ -42,13 +42,18 @@ async function redirectToLink(namespace, key, origin) {
 async function setLink(namespace, key, link) {
   const cur = await golinks.get(encodeKey(namespace, key));
   if (cur) {
-    return new Response(`${key} is already set to ${cur}`, { status: 400 });
+    return new Response(`${key} is already set to ${cur}`, {
+      status: 400,
+      headers: { 'Access-Control-Allow-Origin': '*' },
+    });
   }
   await Promise.all([
     golinks.put(encodeKey(namespace, key), link),
     golinks.put(encodeLink(namespace, link, key), true),
   ]);
-  return new Response(`set link ${namespace}/${key} to ${link}`);
+  return new Response(`set link ${namespace}/${key} to ${link}`, {
+    headers: { 'Access-Control-Allow-Origin': '*' },
+  });
 }
 
 async function lookupByLink(namespace, link) {
@@ -56,7 +61,10 @@ async function lookupByLink(namespace, link) {
   const list = await golinks.list({ prefix: encodeLink(namespace, link, '') });
   const keys = list.keys.map((item) => decodeLink(namespace, link, item.name));
   return new Response(JSON.stringify(keys), {
-    headers: { 'Content-Type': 'application/json' },
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Content-Type': 'application/json',
+    },
   });
 }
 
