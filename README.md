@@ -21,3 +21,7 @@ a Google search.
 To fix this, go to `about:config` and add a config entry for
 `browser.fixup.domainwhitelist.go = true`. This will tell Firefox that `go` is
 a valid domain, all on its own, and it should try resolving it.
+
+References:
+  - https://bugzilla.mozilla.org/show_bug.cgi?id=1642435
+  - https://iafisher.com/blog/2020/10/golinks
