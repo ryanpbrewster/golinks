@@ -2,7 +2,7 @@
 
 A simple utility to redirect from short-links, like `go/foo`, to full urls, like `https://google.com`.
 
-Available as a [Chrome Extension](https://chrome.google.com/webstore/detail/golinks/gfibcnejmknobdgdfejnddhakfpbabjb) and a [Firefox Extension](https://addons.mozilla.org/en-US/firefox/addon/rpb-golinks/).
+In order to use this, you'll want to download a browser extension (the main interaction involves browser navigation). Available for [Chrome](https://chrome.google.com/webstore/detail/golinks/gfibcnejmknobdgdfejnddhakfpbabjb) and [Firefox](https://addons.mozilla.org/en-US/firefox/addon/rpb-golinks/).
 
 ## Backend
 
